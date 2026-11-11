@@ -1,3 +1,5 @@
 SmartSpend
-data/*.txt
+data/expenses.txt
+data/incomes.txt
 *.o
+main-backup.cpp

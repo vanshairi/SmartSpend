@@ -4,6 +4,8 @@
 #include <fstream>
 #include <iomanip>
 #include <filesystem>
+#include <sstream>
+#include <cmath>
 
 using namespace std;
 
@@ -147,6 +149,7 @@ public:
 };
 
 
+
 class ExpenseTracker
 {
 private:
@@ -155,6 +158,60 @@ private:
 
     int nextIncomeID;
     int nextExpenseID;
+
+    // Safely read integer input
+    bool readInt(const string& prompt, int& value)
+    {
+        string input;
+
+        while (true)
+        {
+            cout << prompt;
+
+            if (!getline(cin, input))
+            {
+                return false;
+            }
+
+            stringstream inputStream(input);
+            char extra;
+
+            if (inputStream >> value && !(inputStream >> extra))
+            {
+                return true;
+            }
+
+            cout << "Invalid input! Please enter a valid integer.\n";
+        }
+    }
+
+    // Safely read decimal input
+    bool readDouble(const string& prompt, double& value)
+    {
+        string input;
+
+        while (true)
+        {
+            cout << prompt;
+
+            if (!getline(cin, input))
+            {
+                return false;
+            }
+
+            stringstream inputStream(input);
+            char extra;
+
+            if (inputStream >> value &&
+                !(inputStream >> extra) &&
+                isfinite(value))
+            {
+                return true;
+            }
+
+            cout << "Invalid input! Please enter a valid number.\n";
+        }
+    }
 
 public:
 
