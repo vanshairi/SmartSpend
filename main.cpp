@@ -213,6 +213,105 @@ private:
         }
     }
 
+
+    bool readNonEmptyString(const string& prompt, string& value)
+    {
+        while (true)
+        {
+            cout << prompt;
+
+            if (!getline(cin, value))
+            {
+                return false;
+            }
+
+            if (!value.empty() &&
+                value.find_first_not_of(" \t") != string::npos)
+            {
+                return true;
+            }
+
+            cout << "Input cannot be empty! Please try again.\n";
+        }
+    }
+
+
+    bool isValidDate(const string& date)
+    {
+        // Check the required date format
+        if (date.length() != 10 ||
+            date[2] != '-' ||
+            date[5] != '-')
+        {
+            return false;
+        }
+
+        // Check that all other characters are digits
+        for (int i = 0; i < 10; i++)
+        {
+            if (i == 2 || i == 5)
+                continue;
+
+            if (date[i] < '0' || date[i] > '9')
+                return false;
+        }
+
+        int day = stoi(date.substr(0, 2));
+        int month = stoi(date.substr(3, 2));
+        int year = stoi(date.substr(6, 4));
+
+        if (year < 1 || month < 1 || month > 12)
+            return false;
+
+        int daysInMonth[] =
+        {
+            31, 28, 31, 30, 31, 30,
+            31, 31, 30, 31, 30, 31
+        };
+
+        // Check for leap year
+        bool leapYear =
+            (year % 400 == 0) ||
+            (year % 4 == 0 && year % 100 != 0);
+
+        if (leapYear)
+        {
+            daysInMonth[1] = 29;
+        }
+
+        if (day < 1 || day > daysInMonth[month - 1])
+            return false;
+
+        return true;
+    }
+
+
+    bool readDate(const string& prompt, string& date)
+    {
+        while (true)
+        {
+            cout << prompt;
+
+            if (!getline(cin, date))
+            {
+                return false;
+            }
+
+            if (isValidDate(date))
+            {
+                return true;
+            }
+
+            cout << "Invalid date! Please enter a valid date "
+                << "in DD-MM-YYYY format.\n";
+        }
+    }
+
+
+
+
+
+
 public:
 
     // Constructor
@@ -231,25 +330,23 @@ public:
         double amount;
         string source, description, date;
 
-        cout << "\nEnter income amount: ";
-        cin >> amount;
+        if (!readDouble("\nEnter income amount: ", amount))
+            return;
 
         if (amount <= 0)
         {
-            cout << "\nInvalid amount!\n";
+            cout << "\nInvalid amount! Amount must be greater than zero.\n";
             return;
         }
 
-        cin.ignore();
+        if (!readNonEmptyString("Enter income source: ", source))
+            return;
 
-        cout << "Enter income source: ";
-        getline(cin, source);
+        if (!readNonEmptyString("Enter description: ", description))
+            return;
 
-        cout << "Enter description: ";
-        getline(cin, description);
-
-        cout << "Enter date (DD-MM-YYYY): ";
-        getline(cin, date);
+        if (!readDate("Enter date (DD-MM-YYYY): ", date))
+            return;
 
         Income newIncome(
             nextIncomeID,
@@ -267,6 +364,7 @@ public:
 
         nextIncomeID++;
     }
+
 
     void viewIncome()
     {
@@ -289,8 +387,8 @@ public:
     {
         int id;
 
-        cout << "\nEnter Income ID to search: ";
-        cin >> id;
+        if (!readInt("\nEnter Income ID to search: ", id))
+            return;
 
         for (const Income& income : incomes)
         {
@@ -309,8 +407,8 @@ public:
     {
         int id;
 
-        cout << "\nEnter Income ID to delete: ";
-        cin >> id;
+        if (!readInt("\nEnter Income ID to delete: ", id))
+            return;
 
         for (auto it = incomes.begin(); it != incomes.end(); it++)
         {
@@ -328,21 +426,20 @@ public:
     }
 
 
+    
     void addExpense()
     {
         double amount;
         string category, description, date;
 
-        cout << "\nEnter expense amount: ";
-        cin >> amount;
+        if (!readDouble("\nEnter expense amount: ", amount))
+            return;
 
         if (amount <= 0)
         {
-            cout << "\nInvalid amount!\n";
+            cout << "\nInvalid amount! Amount must be greater than zero.\n";
             return;
         }
-
-        cin.ignore();
 
         cout << "\nSelect Expense Category:\n";
         cout << "1. Food\n";
@@ -355,8 +452,9 @@ public:
         cout << "8. Other\n";
 
         int choice;
-        cout << "Enter choice: ";
-        cin >> choice;
+
+        if (!readInt("Enter choice: ", choice))
+            return;
 
         switch (choice)
         {
@@ -374,13 +472,11 @@ public:
                 return;
         }
 
-        cin.ignore();
+        if (!readNonEmptyString("Enter description: ", description))
+            return;
 
-        cout << "Enter description: ";
-        getline(cin, description);
-
-        cout << "Enter date (DD-MM-YYYY): ";
-        getline(cin, date);
+        if (!readDate("Enter date (DD-MM-YYYY): ", date))
+            return;
 
         Expense newExpense(
             nextExpenseID,
@@ -398,6 +494,7 @@ public:
 
         nextExpenseID++;
     }
+
 
     void viewExpenses()
     {
@@ -420,8 +517,8 @@ public:
     {
         int id;
 
-        cout << "\nEnter Expense ID to search: ";
-        cin >> id;
+        if (!readInt("\nEnter Expense ID to search: ", id))
+            return;
 
         for (const Expense& expense : expenses)
         {
@@ -440,8 +537,8 @@ public:
     {
         int id;
 
-        cout << "\nEnter Expense ID to delete: ";
-        cin >> id;
+        if (!readInt("\nEnter Expense ID to delete: ", id))
+            return;
 
         for (auto it = expenses.begin(); it != expenses.end(); it++)
         {
@@ -535,6 +632,7 @@ public:
     }
 
 
+    
     void searchTransaction()
     {
         int type, id;
@@ -543,11 +641,17 @@ public:
         cout << "1. Search Income\n";
         cout << "2. Search Expense\n";
 
-        cout << "Enter choice: ";
-        cin >> type;
+        if (!readInt("Enter choice: ", type))
+            return;
 
-        cout << "Enter Transaction ID: ";
-        cin >> id;
+        if (type != 1 && type != 2)
+        {
+            cout << "\nInvalid choice!\n";
+            return;
+        }
+
+        if (!readInt("Enter Transaction ID: ", id))
+            return;
 
         if (type == 1)
         {
@@ -561,7 +665,7 @@ public:
                 }
             }
         }
-        else if (type == 2)
+        else
         {
             for (const Expense& expense : expenses)
             {
@@ -573,14 +677,10 @@ public:
                 }
             }
         }
-        else
-        {
-            cout << "\nInvalid choice!\n";
-            return;
-        }
 
         cout << "\nTransaction not found.\n";
     }
+
 
     void saveIncomes()
     {
@@ -740,8 +840,8 @@ public:
             cout << "4. Delete Income\n";
             cout << "0. Back to Main Menu\n";
 
-            cout << "\nEnter your choice: ";
-            cin >> choice;
+            if (!readInt("\nEnter your choice: ", choice))
+                return;
 
             switch (choice)
             {
@@ -786,8 +886,8 @@ public:
             cout << "4. Delete Expense\n";
             cout << "0. Back to Main Menu\n";
 
-            cout << "\nEnter your choice: ";
-            cin >> choice;
+            if (!readInt("\nEnter your choice: ", choice))
+                return;
 
             switch (choice)
             {
@@ -839,8 +939,8 @@ public:
             cout << "6. Financial Summary\n";
             cout << "0. Exit Application\n";
 
-            cout << "\nEnter your choice: ";
-            cin >> choice;
+            if (!readInt("\nEnter your choice: ", choice))
+                return;
 
             switch (choice)
             {
